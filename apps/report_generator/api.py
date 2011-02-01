@@ -2,32 +2,36 @@ import re
 import htmlentitydefs
 import types
 import os
+import sys
 #import cStringIO as StringIO
 from cStringIO import StringIO
 
 from django.http import HttpResponse, Http404, HttpResponseServerError
-from django.shortcuts import render_to_response,HttpResponseRedirect, redirect
+from django.shortcuts import HttpResponseRedirect, redirect
 from django.template import Template, Context, RequestContext
 from django.template.loader import render_to_string
-#from django.utils.translation import ugettext as _
 from django.utils.safestring import mark_safe
-#from django.db.models import get_model
 from django.conf import settings
+from django.utils.translation import ugettext as _
 
+
+#from django.views.debug import ExceptionReporter
+from reporter import ExceptionReporter
+    
 try:
     import reportlab
 except ImportError:
-    raise ImportError, "reportlab is not installed"
+    raise ImportError, 'reportlab is not installed'
 
 try:
     import html5lib
 except ImportError:
-    raise ImportError, "html5lib is not installed"
+    raise ImportError, 'html5lib is not installed'
 
 try:
     import ho.pisa as pisa
 except ImportError:
-    raise ImportError, "python-pisa (xhtmltopdf) is not installed"
+    raise ImportError, 'python-pisa (xhtmltopdf) is not installed'
 
 from models import Report
 
@@ -59,42 +63,46 @@ def unescape(text):
         return text # leave as is
     return re.sub("&#?\w+;", fixup, text)
 
+
 def fetch_resources(uri, rel):
-    path = os.path.join(settings.MEDIA_ROOT, uri.replace(settings.MEDIA_URL, ""))
+    path = os.path.join(settings.MEDIA_ROOT, uri.replace(settings.MEDIA_URL, ''))
     return path
 
-
-def render_to_pdf(request, template_src, context_dict, preview=False):
-    #from django.views.debug import ExceptionReporter
-    from reporter import ExceptionReporter
-    
+def render_template(request, template_src, context_dict):
     context = Context(context_dict)
 
     try:
         template = Template(template_src)
-        html = template.render(context)#, context_instance=RequestContext(request))
+        content = template.render(context)#, context_instance=RequestContext(request))
     except:
-
-        import sys
         reporter = ExceptionReporter(request, *sys.exc_info())
         content = reporter.get_traceback_html(strip_frames=4,
                                             template_context=context)
+    
+    return content
+    
+
+def render_to_pdf(request, template_src, context_dict):
+    content = render_template(request, template_src, context_dict)
         #content = reporter.get_traceback_html()#template_context=context)
 
         #return HttpResponseServerError(content, mimetype='text/html')
         #return HttpResponse(content, mimetype='text/html')
-        html=content
-                        
-    if not preview:			
-        result = StringIO()
-        pdf = pisa.pisaDocument(StringIO(html.encode("UTF-8")), result, link_callback = fetch_resources)
+    #    html=content
+                            
+    result = StringIO()
+    pdf = pisa.pisaDocument(StringIO(content.encode("UTF-8")), result, link_callback = fetch_resources)
 
-        if not pdf.err:
-            return HttpResponse(result.getvalue(), mimetype='application/pdf')
-        return HttpResponse('We had some errors<pre>%s</pre>' % escape(html))
+    if pdf.err:
+        return HttpResponse(_(u'pdf error: %s' % pdf.err))
+        #, <pre>%s</pre>' % escape(content))
     else:
-        return HttpResponse(html)
+        return HttpResponse(result.getvalue(), mimetype='application/pdf')
 
+
+def render_to_response(request, template_src, context_dict):
+    content = render_template(request, template_src, context_dict)
+    return HttpResponse(content)
 
 
 def return_attrib(obj, attrib, arguments=None):
@@ -123,28 +131,29 @@ def render_group(group):
     qs_transformations = []
     list_sort_string = None
     
-    if group.filter_string:
-        qs_transformations.append('eval_qs_filter:"%s"' % group.filter_string)
+    #if group.filter_string:
+    #    qs_transformations.append('eval_qs_filter:"%s"' % group.filter_string)
         
-    if group.order_by:
-        qs_transformations.append('eval_sorting:"%s"' % group.order_by)
-        list_sort_elements = []
-        for field in group.order_by.split(','):
-            if field.startswith('-'):
-                list_sort_elements.append('dictsortreversed:"%s"' % field.lstrip('-'))
-            else:
-                list_sort_elements.append('dictsort:"%s"' % field)
-
-        list_sort_string = "|".join(list_sort_elements)
+    #if group.order_by:
+    #    qs_transformations.append('eval_sorting:"%s"' % group.order_by)
+    #    list_sort_elements = []
+    #    for field in group.order_by.split(','):
+    #        if field.startswith('-'):
+    #            list_sort_elements.append('dictsortreversed:"%s"' % field.lstrip('-'))
+    #        else:
+    #            list_sort_elements.append('dictsort:"%s"' % field)
+    #
+    #    list_sort_string = "|".join(list_sort_elements)
             
-    qs_transformations_string = "|".join(qs_transformations)
+    #qs_transformations_string = "|".join(qs_transformations)
 
     if group.group_by:
         if group.group_by.startswith('-'):
             dictsort = 'dictsort:"%s"' % group.group_by.lstrip('-')
         else:
             dictsort = "dictsortreversed:'%s'" % group.group_by
-        template += append(4, '{%% regroup data_source|%(qs_transformations)s%(dictsort)s by %(group_by)s as group_list %%}' % ( { 'dictsort' : dictsort, 'group_by' : group.group_by.lstrip('-'), 'qs_transformations' : qs_transformations_string and qs_transformations_string + "|" }))
+        #template += append(4, '{%% regroup data_source|%(qs_transformations)s%(dictsort)s by %(group_by)s as group_list %%}' % ( { 'dictsort' : dictsort, 'group_by' : group.group_by.lstrip('-'), 'qs_transformations' : qs_transformations_string and qs_transformations_string + "|" }))
+        template += append(4, '{%% regroup data_source|%(dictsort)s by %(group_by)s as group_list %%}' % ( { 'dictsort' : dictsort, 'group_by' : group.group_by.lstrip('-') }))
 
         template += append(4, '{% for group in group_list %}')
         template += append(4, '{% with group.grouper as group_title %}')
@@ -154,7 +163,8 @@ def render_group(group):
     else:
         template += append(4, '<div class="group_header" id="group_%s_header">%s</div>' % (group.name, unescape(group.header)))
         template += append(4, '<div class="group_detail" id="group_%s_detail">' % group.name)
-        template += append(5, "{%% for instance in data_source%(qs_transformations)s %%}" % ({'qs_transformations':qs_transformations_string and "|" + qs_transformations_string or ''}))
+#        template += append(5, "{%% for instance in data_source%(qs_transformations)s %%}" % ({'qs_transformations':qs_transformations_string and "|" + qs_transformations_string or ''}))
+        template += append(5, "{% for instance in data_source %}")
 
     template += append(6, '<span class="group_detail" id="group_%s_detail">%s</span>' % (group.name, unescape(group.detail)))
 
@@ -173,10 +183,12 @@ def render_group(group):
     template += append(4, '<div class="group_footer" id="group_%s_footer">%s</div>' % (group.name, unescape(group.footer)))
 
     return template
-    
 
-def generate_report(request, report, queryset=None):
-    preview_mode = request.GET.get('preview', False)
+
+from assets.models import Person
+
+def generate_report(request, report):#, queryset=None):
+    mode = request.GET.get('mode', 'pdf')
     template = ''
 
     template += append(0, report.extra_tags or '')
@@ -209,9 +221,17 @@ def generate_report(request, report, queryset=None):
     template += append(2, '</body>')
     template += append(1, '</html>')
 
-    if not queryset:
-        queryset = eval("model.%s%s" % (report.filter_string, report.order_by and ".order_by('%s')" % report.order_by or '') , {'model':report.model.model_class()})
-
-    context = {'data_source':queryset}
-
-    return render_to_pdf(request, template, context, preview=preview_mode)
+    #if not queryset:
+    #    queryset = eval("model.%s%s" % (report.filter_string, report.order_by and ".order_by('%s')" % report.order_by or '') , {'model':report.model.model_class()})
+    
+    #context = {'data_source':queryset}
+    context = {'data_source':Person.objects.all()}#report.queryset}
+    
+    if mode == 'pdf':
+        return render_to_pdf(request, template, context)
+    elif mode == 'html':
+        return render_to_response(request, template, context)
+    elif mode == 'raw':
+        return HttpResponse(template)
+    else:
+        return HttpResponse(_(u'Invalid display mode'))

@@ -33,7 +33,7 @@ class ExceptionReporter(debug.ExceptionReporter):
             'request': self.request,
             'template_info': self.template_info,
             'template_does_not_exist': self.template_does_not_exist,
-            'context': template_context,
+            #'context': template_context,
         })
 
         return t.render(c)
@@ -82,72 +82,13 @@ EXCEPTION_TEMPLATE = """
     #template, #template-not-exist { background:#f6f6f6; }
     #template-not-exist ul { margin: 0 0 0 20px; }
     #unicode-hint { background:#eee; }
-    #traceback { background:#eee; }
-    #requestinfo { background:#f6f6f6; padding-left:120px; }
     #summary table { border:none; background:transparent; }
-    #requestinfo h2, #requestinfo h3 { position:relative; margin-left:-100px; }
-    #requestinfo h3 { margin-bottom:-1em; }
     .error { background: #ffc; }
     .specific { color:#cc3300; font-weight:bold; }
     h2 span.commands { font-size:.7em;}
     span.commands a:link {color:#5E5694;}
     pre.exception_value { font-family: sans-serif; color: #666; font-size: 1.5em; margin: 10px 0 10px 0; }
   </style>
-  <script type="text/javascript">
-  //<!--
-    function getElementsByClassName(oElm, strTagName, strClassName){
-        // Written by Jonathan Snook, http://www.snook.ca/jon; Add-ons by Robert Nyman, http://www.robertnyman.com
-        var arrElements = (strTagName == "*" && document.all)? document.all :
-        oElm.getElementsByTagName(strTagName);
-        var arrReturnElements = new Array();
-        strClassName = strClassName.replace(/\-/g, "\\-");
-        var oRegExp = new RegExp("(^|\\s)" + strClassName + "(\\s|$)");
-        var oElement;
-        for(var i=0; i<arrElements.length; i++){
-            oElement = arrElements[i];
-            if(oRegExp.test(oElement.className)){
-                arrReturnElements.push(oElement);
-            }
-        }
-        return (arrReturnElements)
-    }
-    function hideAll(elems) {
-      for (var e = 0; e < elems.length; e++) {
-        elems[e].style.display = 'none';
-      }
-    }
-    window.onload = function() {
-      hideAll(getElementsByClassName(document, 'table', 'vars'));
-      hideAll(getElementsByClassName(document, 'ol', 'pre-context'));
-      hideAll(getElementsByClassName(document, 'ol', 'post-context'));
-      hideAll(getElementsByClassName(document, 'div', 'pastebin'));
-    }
-    function toggle() {
-      for (var i = 0; i < arguments.length; i++) {
-        var e = document.getElementById(arguments[i]);
-        if (e) {
-          e.style.display = e.style.display == 'none' ? 'block' : 'none';
-        }
-      }
-      return false;
-    }
-    function varToggle(link, id) {
-      toggle('v' + id);
-      var s = link.getElementsByTagName('span')[0];
-      var uarr = String.fromCharCode(0x25b6);
-      var darr = String.fromCharCode(0x25bc);
-      s.innerHTML = s.innerHTML == uarr ? darr : uarr;
-      return false;
-    }
-    function switchPastebinFriendly(link) {
-      s1 = "Switch to copy-and-paste view";
-      s2 = "Switch back to interactive view";
-      link.innerHTML = link.innerHTML == s1 ? s2 : s1;
-      toggle('browserTraceback', 'pastebinTraceback');
-      return false;
-    }
-    //-->
-  </script>
 </head>
 <body>
 <div id="summary">
@@ -193,108 +134,9 @@ EXCEPTION_TEMPLATE = """
    </table>
 </div>
 {% endif %}
-{% if frames %}
-<div id="traceback">
-  <h2>Traceback <span class="commands"><a href="#" onclick="return switchPastebinFriendly(this);">Switch to copy-and-paste view</a></span></h2>
-  {% autoescape off %}
-  <div id="browserTraceback">
-    <ul class="traceback">
-      {# ignore first 2 frames #}
-      {% for frame in frames %}
-        <li class="frame">
-          <code>{{ frame.filename|unsafepath|escape }}</code> in <code>{{ frame.function|escape }}</code>
 
-          {% if frame.context_line %}
-            <div class="context" id="c{{ frame.id }}">
-              {% if frame.pre_context %}
-                <ol start="{{ frame.pre_context_lineno }}" class="pre-context" id="pre{{ frame.id }}">{% for line in frame.pre_context %}<li onclick="toggle('pre{{ frame.id }}', 'post{{ frame.id }}')">{{ line|escape }}</li>{% endfor %}</ol>
-              {% endif %}
-              <ol start="{{ frame.lineno }}" class="context-line"><li onclick="toggle('pre{{ frame.id }}', 'post{{ frame.id }}')">{{ frame.context_line|escape }} <span>...</span></li></ol>
-              {% if frame.post_context %}
-                <ol start='{{ frame.lineno|add:"1" }}' class="post-context" id="post{{ frame.id }}">{% for line in frame.post_context %}<li onclick="toggle('pre{{ frame.id }}', 'post{{ frame.id }}')">{{ line|escape }}</li>{% endfor %}</ol>
-              {% endif %}
-            </div>
-          {% endif %}
 
-          {% if frame.vars %}
-            <div class="commands">
-                <a href="#" onclick="return varToggle(this, '{{ frame.id }}')"><span>&#x25b6;</span> Local vars</a>
-            </div>
-            <table class="vars" id="v{{ frame.id }}">
-              <thead>
-                <tr>
-                  <th>Variable</th>
-                  <th>Value</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for var in frame.vars|dictsort:"0" %}
-                  <tr>
-                    <td>{{ var.0|escape }}</td>
-                    <td class="code"><div>{{ var.1|pprint|escape }}</div></td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          {% endif %}
-        </li>
-      {% endfor %}
-    </ul>
-  </div>
-  {% endautoescape %}
-  <form action="http://dpaste.com/" name="pasteform" id="pasteform" method="post">
-  <div id="pastebinTraceback" class="pastebin">
-    <input type="hidden" name="language" value="PythonConsole">
-    <input type="hidden" name="title" value="{{ exception_type|escape }} at {{ exception_value|escape }}">
-    <input type="hidden" name="source" value="Templator Dpaste Agent">
-    <input type="hidden" name="poster" value="Templator">
-    <textarea name="content" id="traceback_area" cols="140" rows="25">
-{% if template_info %}
-Template error:
-In template {{ template_info.name }}, error at line {{ template_info.line }}
-   {{ template_info.message }}{% for source_line in template_info.source_lines %}{% ifequal source_line.0 template_info.line %}
-   {{ source_line.0 }} : {{ template_info.before }} {{ template_info.during }} {{ template_info.after }}
-{% else %}
-   {{ source_line.0 }} : {{ source_line.1 }}
-{% endifequal %}{% endfor %}{% endif %}
-Traceback:
-{% for frame in frames %}File "{{ frame.filename|unsafepath|escape }}" in {{ frame.function|escape }}
-{% if frame.context_line %}  {{ frame.lineno }}. {{ frame.context_line|escape }}{% endif %}
-{% endfor %}
-Exception Type: {{ exception_type|escape }}
-Exception Value: {{ exception_value|escape }}
-</textarea>
-  <br><br>
-  <input type="submit" value="Share this traceback on a public Web site">
-  </div>
-</form>
-</div>
-{% endif %}
 
-<div id="requestinfo">
-  <h2>Context information</h2>
-
-  {% if context %}
-    <table class="req">
-      <thead>
-        <tr>
-          <th>Variable</th>
-          <th>Value</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for var in context.items %}
-          <tr>
-            <td>{{ var.0 }}</td>
-            <td class="code"><div>{{ var.1|pprint }}</div></td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  {% else %}
-    <p>No context</p>
-  {% endif %}
-</div>
 </body>
 </html>
 """

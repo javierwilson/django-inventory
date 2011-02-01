@@ -8,19 +8,17 @@ from models import Report, Parameter, Group
 
 
 class GroupAdminForm(forms.ModelForm):
-	class Meta:
-		model = Group
+    class Meta:
+        model = Group
 
-
-	def __init__(self, *args, **kwargs):
-		super(GroupAdminForm, self).__init__(*args, **kwargs)
-		self.fields['header'].widget = TinyMCE(attrs={'cols': 80, 'rows': 20})
-		self.fields['detail'].widget = TinyMCE(attrs={'cols': 80, 'rows': 20})
-		self.fields['footer'].widget = TinyMCE(attrs={'cols': 80, 'rows': 20})
-
-		self.fields['parent'].queryset = Group.objects.exclude(id = self.instance.id)
-		
-		
+    def __init__(self, *args, **kwargs):
+        super(GroupAdminForm, self).__init__(*args, **kwargs)
+        self.fields['header'].widget = TinyMCE(attrs={'cols':80, 'rows':20})
+        self.fields['detail'].widget = TinyMCE(attrs={'cols':80, 'rows':20})
+        self.fields['footer'].widget = TinyMCE(attrs={'cols':80, 'rows':20})
+        self.fields['parent'].queryset = Group.objects.exclude(id=self.instance.id)
+        
+        
 #		if self.instance.id:
 #			try:
 #				top_group = self.instance.report.group_set.get(top_group=True)
@@ -28,41 +26,40 @@ class GroupAdminForm(forms.ModelForm):
 #					self.fields['parent_group'].initial = top_group
 #			except:
 #				self.fields['top_group'].initial = True		
-				#self.instance.group_set.g
-				#if 
-			#	pass
-				#self.field['top_group
-				#print "No top"
-			#self.fields['parent_group'].value ='1'
+                #self.instance.group_set.g
+                #if 
+            #	pass
+                #self.field['top_group
+                #print "No top"
+            #self.fields['parent_group'].value ='1'
 
-	
+    
 class GroupInline(admin.StackedInline):
-	model = Group
-	extra = 1
-	allow_add = True
-	form = GroupAdminForm
+    model = Group
+    extra = 1
+    allow_add = True
+    form = GroupAdminForm
 
-	
+    
 class ParameterInline(admin.StackedInline):
-	model = Parameter
-	extra = 1
-	allow_add = True
+    model = Parameter
+    extra = 1
+    allow_add = True
 
 
 class ReportAdminForm(forms.ModelForm):
-	class Meta:
-		model = Report
+    class Meta:
+        model = Report
 
-	def __init__(self, *args, **kwargs):
-		super(ReportAdminForm, self).__init__(*args, **kwargs)
-		self.fields['page_header'].widget = TinyMCE(attrs={'cols': 80, 'rows': 20})
-		self.fields['page_footer'].widget = TinyMCE(attrs={'cols': 80, 'rows': 20})
+    def __init__(self, *args, **kwargs):
+        super(ReportAdminForm, self).__init__(*args, **kwargs)
+        self.fields['page_header'].widget = TinyMCE(attrs={'cols':80, 'rows':20})
+        self.fields['page_footer'].widget = TinyMCE(attrs={'cols':80, 'rows':20})
 
-		
+        
 class ReportAdmin(admin.ModelAdmin):
-	inlines = [ParameterInline, GroupInline]
-
-	form = ReportAdminForm
+    inlines = [ParameterInline, GroupInline]
+    form = ReportAdminForm
 
 
 admin.site.register(Report, ReportAdmin)
