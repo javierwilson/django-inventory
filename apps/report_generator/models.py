@@ -35,17 +35,22 @@ class Report(models.Model):
     css_style = models.TextField(blank=True, null=True, verbose_name=_(u'CSS style'), default=DEFAULT_STYLE, help_text=_(u'Use only the subset of styles supported by pisa.'))
     page_header = models.TextField(blank=True, null=True, verbose_name=_(u'page header'), help_text=_(u'Element that is meant to be displayed at the beginning of every page, the element is identified with the id #page_header.'))
     page_footer = models.TextField(blank=True, null=True, verbose_name=_(u'page footer'), help_text=_(u'Element that is meant to be displayed at the end of every page, the element is identified with the id #page_footer.'))		
-    queryset = models.CharField(max_length=128, verbose_name=_(u'queryset'))
+    model = models.ForeignKey(ContentType, verbose_name=_(u'model'))
+    queryset = models.CharField(max_length=128, verbose_name=_(u'queryset'), help_text=_(u'A string that will be evaluated and will results in a queryset, use the variable name "model" to reference the model selected.'))
 
     def __unicode__(self):
         return self.name
+
+    @models.permalink
+    def get_absolute_url(self):
+        return ('report_view', [str(self.id)])        
 
     class Meta:
         ordering = ('name',)
         verbose_name = _(u'report')
         verbose_name_plural = _(u'reports')	
 
-
+'''
 class Parameter(models.Model):
     report = models.ForeignKey(Report, verbose_name = _(u'report'))
     name = models.CharField(max_length = 32, verbose_name = _(u'name'))
@@ -64,7 +69,7 @@ class Parameter(models.Model):
         ordering = ('name',)
         verbose_name = _(u'parameter')
         verbose_name_plural = _(u'parameters')	
-
+'''
 
 #TODO: order
 class Group(models.Model):

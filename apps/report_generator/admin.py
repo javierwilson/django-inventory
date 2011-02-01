@@ -4,7 +4,7 @@ from django import forms
 from django.db import models
 from tinymce.widgets import TinyMCE
 
-from models import Report, Parameter, Group
+from models import Report, Group#, Parameter
 
 
 class GroupAdminForm(forms.ModelForm):
@@ -41,10 +41,10 @@ class GroupInline(admin.StackedInline):
     form = GroupAdminForm
 
     
-class ParameterInline(admin.StackedInline):
-    model = Parameter
-    extra = 1
-    allow_add = True
+#class ParameterInline(admin.StackedInline):
+#    model = Parameter
+#    extra = 1
+#    allow_add = True
 
 
 class ReportAdminForm(forms.ModelForm):
@@ -58,8 +58,17 @@ class ReportAdminForm(forms.ModelForm):
 
         
 class ReportAdmin(admin.ModelAdmin):
-    inlines = [ParameterInline, GroupInline]
+    inlines = [GroupInline]#, ParameterInline]
     form = ReportAdminForm
+
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'description', 'extra_tags', 'css_style', 'page_header', 'page_footer')
+        }),
+        (_(u'Data source'), {
+            'fields': ('model', 'queryset')
+        }),
+    )    
 
 
 admin.site.register(Report, ReportAdmin)

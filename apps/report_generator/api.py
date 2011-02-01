@@ -35,6 +35,11 @@ except ImportError:
 
 from models import Report
 
+
+def report_error(request, message):
+    return HttpResponse(message)
+
+
 #October 28, 2006 | Fredrik Lundh
 #http://effbot.org/zone/re-sub.htm#unescape-html
 def unescape(text):
@@ -187,8 +192,8 @@ def render_group(group):
 
 from assets.models import Person
 
-def generate_report(request, report):#, queryset=None):
-    mode = request.GET.get('mode', 'pdf')
+def generate_report(request, report, queryset=None, mode='pdf'):
+    #mode = request.GET.get('mode', 'pdf')
     template = ''
 
     template += append(0, report.extra_tags or '')
@@ -221,11 +226,14 @@ def generate_report(request, report):#, queryset=None):
     template += append(2, '</body>')
     template += append(1, '</html>')
 
-    #if not queryset:
-    #    queryset = eval("model.%s%s" % (report.filter_string, report.order_by and ".order_by('%s')" % report.order_by or '') , {'model':report.model.model_class()})
+    try:
+        if not queryset:
+            queryset = eval(report.queryset, {'model':report.model.model_class()})
+    except Exception, err:
+        return report_error(request, err)
     
-    #context = {'data_source':queryset}
-    context = {'data_source':Person.objects.all()}#report.queryset}
+    context = {'data_source':queryset}
+    #context = {'data_source':Person.objects.all()}#report.queryset}
     
     if mode == 'pdf':
         return render_to_pdf(request, template, context)
