@@ -122,6 +122,8 @@ INSTALLED_APPS = [
     'movements',
     'main',
     'web_theme',
+    'report_generator',
+    'tinymce',
 ]
 
 TEMPLATE_CONTEXT_PROCESSORS = [
@@ -167,6 +169,37 @@ LOGIN_EXEMPT_URLS = (
 PAGINATION_DEFAULT_PAGINATION = 10
 #--------- Web theme app ---------------
 WEB_THEME = 'warehouse'
+#------------- Tinymce ------------------
+TINYMCE_DEFAULT_CONFIG = {
+    #'plugins' : "safari,spellchecker,pagebreak,style,layer,table,save,advhr,advimage,advlink,emotions,iespell,inlinepopups,insertdatetime,preview,media,searchreplace,print,contextmenu,paste,directionality,fullscreen,noneditable,visualchars,nonbreaking,xhtmlxtras,template,imagemanager,filemanager",
+    'plugins': "table,spellchecker,paste,searchreplace,style",
+    'theme': "advanced",
+    'theme_advanced_buttons1' : "save,newdocument,|,bold,italic,underline,strikethrough,|,justifyleft,justifycenter,justifyright,justifyfull,|,styleselect,formatselect,fontselect,fontsizeselect",
+    'theme_advanced_buttons2' : "cut,copy,paste,pastetext,pasteword,|,search,replace,|,bullist,numlist,|,outdent,indent,blockquote,|,undo,redo,|,link,unlink,anchor,image,cleanup,help,code,|,insertdate,inserttime,preview,|,forecolor,backcolor",
+    'theme_advanced_buttons3' : "tablecontrols,|,hr,removeformat,visualaid,|,sub,sup,|,charmap,emotions,iespell,media,advhr,|,print,|,ltr,rtl,|,fullscreen",
+    'theme_advanced_buttons4' : "insertlayer,moveforward,movebackward,absolute,|,styleprops,spellchecker,|,cite,abbr,acronym,del,ins,attribs,|,visualchars,nonbreaking,template,blockquote,pagebreak,|,insertfile,insertimage,|,special",
+#       'setup' : "function(ed) {\
+#                       // Add Custom Code\
+#                       ed.addButton('special', {\
+#                                       title : 'This is an example description',\
+#                                       image : 'images/example.gif',\
+#                                       onclick : function() {\
+#                                                       alert( ed.selection.getContent({format : 'text'}) );\
+#                                       }\
+#                       });\
+#       }",
+        #'extended_valid_elements' : "pdf:pagenumber[]",
+        #'valid_elements' : "pdf:pagenumber",
+        #'extended_valid_elements' : "pdf:pagenumber",
+        #'custom_elements' : "pdf:pagenumber",
+        'theme_advanced_toolbar_location' : "top",
+        'theme_advanced_toolbar_align' : "left",
+        'theme_advanced_statusbar_location' : "bottom",
+        'theme_advanced_resizing' : True
+        #'entity_encoding': "numeric",
+        #'entities' : "160,nbsp,38,amp,34,quot,162,cent,8364,euro,163,pound,165,yen,169,copy,174,reg,8482,trade,8240,permil,60,lt,62,gt,8804,le,8805,ge,176,deg,8722,minus"
+        #'entities' : "160,nbsp,38,&,60,<,62,>,8722,-"
+}
 #======== End of configuration options =======
 try:
     from settings_local import *

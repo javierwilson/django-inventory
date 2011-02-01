@@ -1,0 +1,2 @@
+* Custom template loader to set template.name to report.name
+* Annotation & aggregation
