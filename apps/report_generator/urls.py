@@ -14,4 +14,5 @@ urlpatterns = patterns('report_generator.views',
     url(r'^report/(?P<object_id>\d+)/$', generic_detail, {'form_class':ReportForm_view, 'queryset':Report.objects.all()}, 'report_view'),
     url(r'^report/(?P<report_id>\d+)/render/$', 'report_render', (), 'report_render'),
     url(r'^report/(?P<report_id>\d+)/preview/$', 'report_preview', (), 'report_preview'),
+    url(r'^report/(?P<report_id>\d+)/debug/$', 'report_debug', (), 'report_debug'),
 )

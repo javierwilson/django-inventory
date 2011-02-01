@@ -190,10 +190,7 @@ def render_group(group):
     return template
 
 
-from assets.models import Person
-
 def generate_report(request, report, queryset=None, mode='pdf'):
-    #mode = request.GET.get('mode', 'pdf')
     template = ''
 
     template += append(0, report.extra_tags or '')
@@ -214,9 +211,8 @@ def generate_report(request, report, queryset=None, mode='pdf'):
     template += append(2, '</head>')
 
     template += append(2, '<body>')
-    
-    
-    template += append(3, "<div id='page_header'>%s</div>" % unescape(report.page_header))
+        
+    template += append(3, '<div id="page_header">%s</div>' % unescape(mark_safe(report.page_header)))
 
     for group in report.group_set.filter(parent=None):
         template += render_group(group)
@@ -233,8 +229,7 @@ def generate_report(request, report, queryset=None, mode='pdf'):
         return report_error(request, err)
     
     context = {'data_source':queryset}
-    #context = {'data_source':Person.objects.all()}#report.queryset}
-    
+   
     if mode == 'pdf':
         return render_to_pdf(request, template, context)
     elif mode == 'html':
