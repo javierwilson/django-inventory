@@ -50,10 +50,10 @@ def unescape(text):
 
     def fixup(m):
         text = m.group(0)
-        if text[:2] == "&#":
+        if text[:2] == '&#':
             # character reference
             try:
-                if text[:3] == "&#x":
+                if text[:3] == '&#x':
                     return unichr(int(text[3:-1], 16))
                 else:
                     return unichr(int(text[2:-1]))
@@ -66,7 +66,7 @@ def unescape(text):
             except KeyError:
                 pass
         return text # leave as is
-    return re.sub("&#?\w+;", fixup, text)
+    return re.sub('&#?\w+;', fixup, text)
 
 
 def fetch_resources(uri, rel):
@@ -89,14 +89,9 @@ def render_template(request, template_src, context_dict):
 
 def render_to_pdf(request, template_src, context_dict):
     content = render_template(request, template_src, context_dict)
-        #content = reporter.get_traceback_html()#template_context=context)
-
-        #return HttpResponseServerError(content, mimetype='text/html')
-        #return HttpResponse(content, mimetype='text/html')
-    #    html=content
-                            
+                           
     result = StringIO()
-    pdf = pisa.pisaDocument(StringIO(content.encode("UTF-8")), result, link_callback = fetch_resources)
+    pdf = pisa.pisaDocument(StringIO(content.encode("UTF-8")), result, link_callback=fetch_resources)
 
     if pdf.err:
         return HttpResponse(_(u'pdf error: %s' % pdf.err))
@@ -122,71 +117,55 @@ def return_attrib(obj, attrib, arguments=None):
             return result
     except Exception, err:
         if settings.DEBUG:
-            return "Filter error: %s; %s" % (attrib, err)
+            return 'Filter error: %s; %s' % (attrib, err)
         else:
             pass
 
 
 def append(indent, text):
-    return "%s%s\n\n" % (indent * '\t', text)
+    return '%s%s\n\n' % (indent * '\t', text)
 
 
-def render_group(group):
+def render_group(group, datasource_name='queryset'):
     template = ''
     qs_transformations = []
     list_sort_string = None
-    
-    #if group.filter_string:
-    #    qs_transformations.append('eval_qs_filter:"%s"' % group.filter_string)
-        
-    #if group.order_by:
-    #    qs_transformations.append('eval_sorting:"%s"' % group.order_by)
-    #    list_sort_elements = []
-    #    for field in group.order_by.split(','):
-    #        if field.startswith('-'):
-    #            list_sort_elements.append('dictsortreversed:"%s"' % field.lstrip('-'))
-    #        else:
-    #            list_sort_elements.append('dictsort:"%s"' % field)
-    #
-    #    list_sort_string = "|".join(list_sort_elements)
-            
-    #qs_transformations_string = "|".join(qs_transformations)
 
     if group.group_by:
         if group.group_by.startswith('-'):
             dictsort = 'dictsort:"%s"' % group.group_by.lstrip('-')
         else:
-            dictsort = "dictsortreversed:'%s'" % group.group_by
-        #template += append(4, '{%% regroup data_source|%(qs_transformations)s%(dictsort)s by %(group_by)s as group_list %%}' % ( { 'dictsort' : dictsort, 'group_by' : group.group_by.lstrip('-'), 'qs_transformations' : qs_transformations_string and qs_transformations_string + "|" }))
-        template += append(4, '{%% regroup data_source|%(dictsort)s by %(group_by)s as group_list %%}' % ( { 'dictsort' : dictsort, 'group_by' : group.group_by.lstrip('-') }))
+            dictsort = 'dictsortreversed:"%s"' % group.group_by
+        template += append(4, '{%% regroup %(datasource_name)s|%(dictsort)s by %(group_by)s as group_list %%}' % ({'datasource_name':datasource_name, 'dictsort':dictsort, 'group_by':group.group_by.lstrip('-')}))
 
         template += append(4, '{% for group in group_list %}')
         template += append(4, '{% with group.grouper as group_title %}')
         template += append(4, '<div class="group_header" id="group_%s_header">%s</div>' % (group.name, unescape(group.header)))
-        template += append(5, '{%% for instance in group.list|%s%s %%}' % (dictsort, "|" + list_sort_string if list_sort_string else ''))#( group.group_by and ("|dictsort:'%s'" % group.group_by) or '' ))
+        template += append(5, '{%% for instance in group.list|%s%s %%}' % (dictsort, '|' + list_sort_string if list_sort_string else ''))
         template += append(4, '<div class="group_detail" id="group_%s_detail">' % group.name)
     else:
         template += append(4, '<div class="group_header" id="group_%s_header">%s</div>' % (group.name, unescape(group.header)))
         template += append(4, '<div class="group_detail" id="group_%s_detail">' % group.name)
-#        template += append(5, "{%% for instance in data_source%(qs_transformations)s %%}" % ({'qs_transformations':qs_transformations_string and "|" + qs_transformations_string or ''}))
-        template += append(5, "{% for instance in data_source %}")
+        template += append(5, '{%% for instance in %(datasource_name)s %%}' % {'datasource_name':datasource_name})
 
     template += append(6, '<span class="group_detail" id="group_%s_detail">%s</span>' % (group.name, unescape(group.detail)))
 
     for child_group in group.child_set.all():
-        template += render_group(child_group)
+        template += append(6, '{% with instance as parent_instance %}')
+        template += render_group(child_group, child_group.queryset)
+        template += append(6, '{% endwith %}')
 
     if group.group_by:
-        template += append(4, "</div>")
+        template += append(4, '</div>')
         template += append(5, '{% endfor %}')
         template += append(4, '{% endwith %}')
         template += append(4, '{% endfor %}')
     else:
-        template += append(5, "{% endfor %}")
-        template += append(4, "</div>")
+        template += append(5, '{% endfor %}')
+        template += append(4, '</div>')
     
     template += append(4, '<div class="group_footer" id="group_%s_footer">%s</div>' % (group.name, unescape(group.footer)))
-
+    
     return template
 
 
@@ -212,12 +191,13 @@ def generate_report(request, report, queryset=None, mode='pdf'):
 
     template += append(2, '<body>')
         
-    template += append(3, '<div id="page_header">%s</div>' % unescape(mark_safe(report.page_header)))
+    template += append(3, '<div id="page_header">%s</div>' % unescape(report.page_header))
 
+    #Render root groups
     for group in report.group_set.filter(parent=None):
         template += render_group(group)
 
-    template += append(3, "<div id='page_footer'>%s</div>" % unescape(report.page_footer))
+    template += append(3, '<div id="page_footer">%s</div>' % unescape(report.page_footer))
 
     template += append(2, '</body>')
     template += append(1, '</html>')
@@ -228,7 +208,7 @@ def generate_report(request, report, queryset=None, mode='pdf'):
     except Exception, err:
         return report_error(request, err)
     
-    context = {'data_source':queryset}
+    context = {'queryset':queryset}
    
     if mode == 'pdf':
         return render_to_pdf(request, template, context)

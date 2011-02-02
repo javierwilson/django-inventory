@@ -27,7 +27,7 @@ DEFAULT_STYLE = """
 """
 
 class Report(models.Model):
-    name = models.CharField(max_length = 128, verbose_name=_(u'name'))
+    name = models.CharField(max_length = 128, verbose_name=_(u'name'), help_text=_(u'This is an internal name and should not contain spaces or special characters'))
     description = models.TextField(null=True, blank=True, verbose_name=_(u'description'))
     creation_datetime = models.DateTimeField(auto_now_add=True, verbose_name=_(u'creation date & time'))
     modified = models.DateTimeField(auto_now=True, verbose_name=_(u'modified'))	
@@ -74,8 +74,8 @@ class Parameter(models.Model):
 #TODO: order
 class Group(models.Model):
     report = models.ForeignKey(Report, verbose_name=_(u'report'))
-    name = models.CharField(max_length=32, verbose_name=_(u'name'))
-    queryset = models.CharField(blank=True, null=True, max_length=128, verbose_name=_(u'queryset'), help_text=_(u'The variable instance is available and refers to an instance of the parent group calling this group.'))
+    name = models.CharField(max_length=32, verbose_name=_(u'name'), help_text=_(u'This is an internal name and should not contain spaces or special characters'))
+    queryset = models.CharField(blank=True, null=True, max_length=128, verbose_name=_(u'queryset'), help_text=_(u'The variable parent_instance is available and refers the instance of the parent group calling this group.'))
     group_by = models.CharField(blank=True, null=True, max_length=128, verbose_name=_(u'group by'))
     header = models.TextField(blank=True, null=True, verbose_name=_(u'header'), help_text=_(u'Element that is displayed at the beginning of every group, the element is identified with the id #group_<group_name>_header and belongs to the class group_header.'))
     detail = models.TextField(blank=True, null=True, verbose_name=_(u'detail'), help_text=_(u'Element that is displayed as the body of every group, the element is identified with the id #group_<group_name>_detail and belongs to the class group_detail.'))
