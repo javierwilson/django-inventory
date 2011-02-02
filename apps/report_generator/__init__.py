@@ -3,32 +3,34 @@ from django.template import add_to_builtins
 
 from common.api import register_links, register_menu
 
-from models import Report
+from models import Report, ModelReportRelationship
 
 # install default filters
 add_to_builtins('report_generator.defaultfilters')
 
-report_list = {'text':_(u'reports'), 'view':'report_list', 'famfam':'report_go'}
-report_preview = {'text':_(u'report preview'), 'view':'report_preview', 'args':'object.id', 'famfam':'report_magnify'}
-report_render = {'text':_(u'generate report'), 'view':'report_render', 'args':'object.id', 'famfam':'report_disk'}
-report_debug = {'text':_(u'debug report'), 'view':'report_debug', 'args':'object.id', 'famfam':'report_link'}
+report_list = {'text':_(u'user reports'), 'view':'report_list', 'famfam':'report_go'}
+report_preview = {'text':_(u'preview'), 'view':'report_preview', 'args':'object.id', 'famfam':'report_magnify'}
+report_render = {'text':_(u'generate'), 'view':'report_render', 'args':'object.id', 'famfam':'report_disk'}
+report_debug = {'text':_(u'debug'), 'view':'report_debug', 'args':'object.id', 'famfam':'report_link'}
 
-#register_links(['item_list', 'item_view', 'item_create', 'item_orphans_list', 'item_update', 'item_delete', 'item_photos', 'item_assign_person', 'template_items_list'], [asset_create], menu_name='sidebar')
 register_links(Report, [report_preview, report_render, report_debug])
-
-#register_links(['person_list', 'person_create', 'person_view', 'person_update', 'person_delete', 'person_photos', 'person_assign_item'], [person_create], menu_name='sidebar')
-#register_links(Person, [person_update, person_delete, person_photos, person_assign_item])
-
-#register_links(['group_list', 'group_view', 'group_create', 'group_update', 'group_delete'], [group_create], menu_name='sidebar')
-#register_links(ItemGroup, [group_update, group_delete])
-
-#register_links(['state_list', 'state_create', 'state_update', 'state_delete'], [state_create], menu_name='sidebar')
-#register_links(State, [state_edit, state_delete])
-
 
 register_menu([
     {'text':_('reports'), 'view':'report_list', 'links':[
         report_list
-    ], 'famfam':'report', 'position':10},
+    ], 'famfam':'report', 'position':6},
 ])
 
+
+for relationship in ModelReportRelationship.objects.all():
+    register_links(relationship.model.model_class(), [
+        {
+            'text':relationship.report,
+            'view':'report_preview_for_object', 'args':{
+                'report_id':relationship.report.id,
+                'app_label':'"%s"' % relationship.model.app_label,
+                'model':'"%s"' % relationship.model.model,
+                'pk':'object.id',
+            }, 'famfam':'report_magnify'
+        }
+    ], menu_name='reports')

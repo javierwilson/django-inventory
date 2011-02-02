@@ -3,7 +3,6 @@ import htmlentitydefs
 import types
 import os
 import sys
-#import cStringIO as StringIO
 from cStringIO import StringIO
 
 from django.http import HttpResponse, Http404, HttpResponseServerError
@@ -14,8 +13,6 @@ from django.utils.safestring import mark_safe
 from django.conf import settings
 from django.utils.translation import ugettext as _
 
-
-#from django.views.debug import ExceptionReporter
 from reporter import ExceptionReporter
     
 try:
@@ -70,10 +67,19 @@ def unescape(text):
 
 
 def fetch_resources(uri, rel):
+    """
+    Fetch filesystem resources needed by the pdf converter
+    """
+    
     path = os.path.join(settings.MEDIA_ROOT, uri.replace(settings.MEDIA_URL, ''))
     return path
 
+
 def render_template(request, template_src, context_dict):
+    """
+    Renders a Django formated template to plain html text
+    """
+    
     context = Context(context_dict)
 
     try:
@@ -88,8 +94,12 @@ def render_template(request, template_src, context_dict):
     
 
 def render_to_pdf(request, template_src, context_dict):
+    """
+    Renders a Django formated template, calls pisa to convert it to
+    PDF and returns a respose to download the pdf file
+    """
     content = render_template(request, template_src, context_dict)
-                           
+    
     result = StringIO()
     pdf = pisa.pisaDocument(StringIO(content.encode("UTF-8")), result, link_callback=fetch_resources)
 
@@ -123,10 +133,19 @@ def return_attrib(obj, attrib, arguments=None):
 
 
 def append(indent, text):
+    """
+    Indent the text to prettify the raw template code
+    """
+    
     return '%s%s\n\n' % (indent * '\t', text)
 
 
 def render_group(group, datasource_name='queryset'):
+    """
+    Render the groups of the report including the root group, may be
+    called recursively
+    """
+    
     template = ''
     qs_transformations = []
     list_sort_string = None
@@ -168,7 +187,7 @@ def render_group(group, datasource_name='queryset'):
     
     return template
 
-
+  
 def generate_report(request, report, queryset=None, mode='pdf'):
     template = ''
 
@@ -202,6 +221,8 @@ def generate_report(request, report, queryset=None, mode='pdf'):
     template += append(2, '</body>')
     template += append(1, '</html>')
 
+    #Use the queryset passed by the view or generate one from the report
+    #model data
     try:
         if not queryset:
             queryset = eval(report.queryset, {'model':report.model.model_class()})

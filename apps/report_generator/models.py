@@ -27,7 +27,7 @@ DEFAULT_STYLE = """
 """
 
 class Report(models.Model):
-    name = models.CharField(max_length = 128, verbose_name=_(u'name'), help_text=_(u'This is an internal name and should not contain spaces or special characters'))
+    title = models.CharField(max_length = 128, verbose_name=_(u'title'))
     description = models.TextField(null=True, blank=True, verbose_name=_(u'description'))
     creation_datetime = models.DateTimeField(auto_now_add=True, verbose_name=_(u'creation date & time'))
     modified = models.DateTimeField(auto_now=True, verbose_name=_(u'modified'))	
@@ -39,14 +39,14 @@ class Report(models.Model):
     queryset = models.CharField(max_length=128, verbose_name=_(u'queryset'), help_text=_(u'A string that will be evaluated and will results in a queryset, use the variable name "model" to reference the model selected.'))
 
     def __unicode__(self):
-        return self.name
+        return self.title
 
     @models.permalink
     def get_absolute_url(self):
         return ('report_view', [str(self.id)])        
 
     class Meta:
-        ordering = ('name',)
+        ordering = ('title',)
         verbose_name = _(u'report')
         verbose_name_plural = _(u'reports')	
 
@@ -71,7 +71,6 @@ class Parameter(models.Model):
         verbose_name_plural = _(u'parameters')	
 '''
 
-#TODO: order
 class Group(models.Model):
     report = models.ForeignKey(Report, verbose_name=_(u'report'))
     name = models.CharField(max_length=32, verbose_name=_(u'name'), help_text=_(u'This is an internal name and should not contain spaces or special characters'))
@@ -91,3 +90,15 @@ class Group(models.Model):
     class Meta:
         verbose_name = _(u'group')
         verbose_name_plural = _(u'groups')
+        
+      
+class ModelReportRelationship(models.Model):
+    model = models.ForeignKey(ContentType, verbose_name=_(u'model'))
+    report = models.ForeignKey(Report, verbose_name=_(u'report'))
+
+    def __unicode__(self):
+        return '%s <-> %s' % (self.model, self.report)
+
+    class Meta:
+        verbose_name = _(u'model report relationship')
+        verbose_name_plural = _(u'model report relationships')	    

@@ -74,11 +74,11 @@
                     <h3>{% blocktrans %}Actions for: {{ object }}{% endblocktrans %}</h3>
                 {% endif %}
             {% else %}
-                <h3>}{% trans 'Actions' %}</h3>
+                <h3>}{% trans "Actions" %}</h3>
             {% endif %}
             <ul class="navigation">
-                {% with 'true' as as_li %}
-                    {% include 'generic_navigation.html' %}
+                {% with "true" as as_li %}
+                    {% include "generic_navigation.html" %}
                 {% endwith %}
             </ul>
         </div>
@@ -87,14 +87,26 @@
     {% get_object_navigation_links "sidebar" %}
         {% if object_navigation_links %}
         <div class="block">
-            <h3>{% trans 'Other available actions' %}</h3>
+            <h3>{% trans "Other available actions" %}</h3>
             <ul class="navigation">
-                {% with 'true' as as_li %}
-                    {% include 'generic_navigation.html' %}
+                {% with "true" as as_li %}
+                    {% include "generic_navigation.html" %}
                 {% endwith %}
             </ul>
         </div>
     {% endif %}
+    
+    {% get_object_navigation_links "reports" %}
+        {% if object_navigation_links %}
+        <div class="block">
+            <h3>{% trans "Reports available" %}</h3>
+            <ul class="navigation">
+                {% with "true" as as_li %}
+                    {% include "generic_navigation.html" %}
+                {% endwith %}
+            </ul>
+        </div>
+    {% endif %}    
 
     {% if filter_form %}
         {% with 'true' as side_bar %}

@@ -4,7 +4,7 @@ from django import forms
 from django.db import models
 from tinymce.widgets import TinyMCE
 
-from models import Report, Group#, Parameter
+from models import Report, Group, ModelReportRelationship#, Parameter
 
 
 class GroupAdminForm(forms.ModelForm):
@@ -63,7 +63,7 @@ class ReportAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('name', 'description', 'extra_tags', 'css_style', 'page_header', 'page_footer')
+            'fields': ('title', 'description', 'extra_tags', 'css_style', 'page_header', 'page_footer')
         }),
         (_(u'Data source'), {
             'fields': ('model', 'queryset')
@@ -72,3 +72,4 @@ class ReportAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Report, ReportAdmin)
+admin.site.register(ModelReportRelationship)
