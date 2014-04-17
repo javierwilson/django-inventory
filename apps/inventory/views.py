@@ -68,11 +68,13 @@ def template_assign_remove_suppliers(request, object_id):
         left_list_title=_(u'Unassigned suppliers'),
         right_list_title=_(u'Assigned suppliers'),
         item_name=_(u"suppliers"))
-            
+
+
 class TemplateItemsView(ListView):
-    template = get_object_or_404(ItemTemplate)
     template_name = "generic_list.html"
-    queryset = template.item_set.all(),
+    def get(self, *args, **kwargs):
+        template = get_object_or_404(ItemTemplate)
+        queryset = template.item_set.all(),
 
 
 def inventory_view(request, object_id):

@@ -37,7 +37,7 @@ urlpatterns = patterns('movements.views',
     url(r'^purchase/order/state/list/$', ExtraListView.as_view(queryset=PurchaseOrderStatus.objects.all(), extra_context=dict(title =_(u'purchase order states'))), name='purchase_order_state_list'),
     url(r'^purchase/order/state/create/$', ExtraCreateView.as_view(model=PurchaseOrderStatus, template_name='generic_form.html', extra_context={'title':_(u'create new purchase order state')}), name='purchase_order_state_create'),
     url(r'^purchase/order/state/(?P<pk>\d+)/update/$', ExtraUpdateView.as_view(model=PurchaseOrderStatus, template_name='generic_form.html'), name='purchase_order_state_update'),
-    url(r'^purchase/order/state/(?P<object_id>\d+)/delete/$', ExtraDeleteView.as_view(), dict({'model':PurchaseOrderStatus}, success_url=reverse_lazy("purchase_order_state_list"), extra_context=dict(object_name=_(u'purchase order status'))), 'purchase_order_state_delete'),
+    url(r'^purchase/order/state/(?P<pk>\d+)/delete/$', ExtraDeleteView.as_view(model=PurchaseOrderStatus, success_url=reverse_lazy("purchase_order_state_list"), extra_context=dict(object_name=_(u'purchase order status'))), name='purchase_order_state_delete'),
 
     url(r'^purchase/order/list/$', ExtraListView.as_view(queryset=PurchaseOrder.objects.all(), list_filters=[purchase_order_state_filter], extra_context=dict(title =_(u'purchase orders'), extra_columns = [{'name':_(u'Active'), 'attribute':lambda x: _(u'Open') if x.active == True else _(u'Closed')}])), name='purchase_order_list'),
     url(r'^purchase/order/(?P<object_id>\d+)/$', 'purchase_order_view', (), 'purchase_order_view'),

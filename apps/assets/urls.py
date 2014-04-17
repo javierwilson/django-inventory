@@ -20,7 +20,7 @@ urlpatterns = patterns('assets.views',
     url(r'^person/(?P<pk>\d+)/$', ExtraDetailView.as_view(form_class=PersonForm_view, queryset=Person.objects.all(), extra_context={'sidebar_subtemplates':['generic_photos_subtemplate.html']}), name='person_view'),
     url(r'^person/list/$', ExtraListView.as_view(queryset=Person.objects.all(), list_filters=[location_filter], extra_context={'title':_(u'people')}), name='person_list'),
     url(r'^person/create/$', ExtraCreateView.as_view(form_class=PersonForm, template_name='generic_form.html'), name='person_create'),
-    url(r'^person/(?P<pk>\d+)/update/$', ExtraUpdateView.as_view(form_class=PersonForm, template_name='generic_form.html'), name='person_update'),
+    url(r'^person/(?P<pk>\d+)/update/$', ExtraUpdateView.as_view(form_class=PersonForm, queryset=Person.objects.all(), template_name='generic_form.html'), name='person_update'),
     url(r'^person/(?P<pk>\d+)/delete/$', ExtraDeleteView.as_view(model=Person, post_delete_redirect='person_list', extra_context={'object_name':_(u'person')}), name='person_delete'),
     url(r'^person/(?P<pk>\d+)/assign/$', 'person_assign_remove_item', (), 'person_assign_item'),
 

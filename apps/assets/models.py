@@ -120,6 +120,8 @@ class Person(models.Model):
     second_last_name = models.CharField(verbose_name=_(u"second last name"), max_length=32, blank=True, null=True)
     first_name = models.CharField(verbose_name=_(u"first name"), max_length=32)
     second_name = models.CharField(verbose_name=_(u"second name or initial"), max_length=32, blank=True, null=True)
+    phone = models.CharField(verbose_name=_(u"phone number"), max_length=32, blank=True, null=True)
+    email = models.CharField(verbose_name=_(u"email address"), max_length=128, blank=True, null=True)
     location = models.ForeignKey(Location, blank=True, null=True, verbose_name=_(u"location"))
     inventory = models.ManyToManyField(Item, blank=True, null=True, verbose_name=_(u"assigned assets"))
 
