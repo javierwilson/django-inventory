@@ -9,9 +9,9 @@
         {% for state in states %}
             <li>
                 {% if state in object.states %}
-                    <a href="{% url item_remove_state object.id state.id %}"><span class="famfam active famfam-delete"></span>{% blocktrans %}Unmark as {{ state }}{% endblocktrans %}</a>
+                    <a href="{% url "item_remove_state" object.id state.id %}"><span class="famfam active famfam-delete"></span>{% blocktrans %}Unmark as {{ state }}{% endblocktrans %}</a>
                 {% else %}
-                    <a href="{% url item_setstate object.id state.id %}"><span class="famfam active famfam-add"></span>{% blocktrans %}Mark as {{ state }}{% endblocktrans %}</a>
+                    <a href="{% url "item_setstate" object.id state.id %}"><span class="famfam active famfam-add"></span>{% blocktrans %}Mark as {{ state }}{% endblocktrans %}</a>
                 {% endif %}
             </li>
         {% empty %}

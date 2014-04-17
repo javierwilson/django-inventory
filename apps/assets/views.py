@@ -5,7 +5,8 @@ from django.utils.translation import ugettext as _
 from django.db.models import Q
 from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
-from django.views.generic.list_detail import object_detail, object_list
+from django.views.generic.list import ListView
+from django.views.generic.detail import DetailView
 from django.core.urlresolvers import reverse
 
 from photos.views import generic_photos

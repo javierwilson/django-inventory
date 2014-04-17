@@ -111,9 +111,11 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.admin',
     'django.contrib.admindocs',
+    'django.contrib.staticfiles',
     'pagination',
     'photologue',
     'photos',
+    'common',
     'common',
     'generic_views',
     'inventory',
@@ -126,17 +128,23 @@ INSTALLED_APPS = [
 ]
 
 TEMPLATE_CONTEXT_PROCESSORS = [
-    "django.core.context_processors.auth",
+    "django.contrib.auth.context_processors.auth",
     "django.core.context_processors.i18n",
     "django.core.context_processors.media",
+    "django.core.context_processors.static",
     'django.core.context_processors.request',
-    "grappelli.context_processors.admin_template_path",
-    'django.contrib.messages.context_processors.messages',
+    "django.core.context_processors.debug",
+    "django.core.context_processors.tz",
+    "django.contrib.messages.context_processors.messages",
 ]
 
 #===== Configuration options ===============
 #--------- Grappelli ----------------
 GRAPPELLI_ADMIN_TITLE = PROJECT_TITLE
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+)
 #--------- Django -------------------
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
@@ -169,6 +177,8 @@ PAGINATION_DEFAULT_PAGINATION = 10
 #--------- Web theme app ---------------
 WEB_THEME = 'warehouse'
 #======== End of configuration options =======
+STATIC_URL = '/static/'
+
 try:
     from settings_local import *
 except ImportError:

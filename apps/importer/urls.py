@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import *
+from django.conf.urls import *
 from forms import PreviewForm, ExpressionForm, ImportWizard
 
 urlpatterns = patterns('importer.views',

@@ -6,9 +6,10 @@ from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
-from django.views.generic.list_detail import object_detail, object_list
+from django.views.generic.list import ListView
+from django.views.generic.detail import DetailView
 from django.core.urlresolvers import reverse
-from django.views.generic.create_update import create_object
+from django.views.generic.edit import CreateView
 from django.forms.formsets import formset_factory
 
 from inventory.models import Supplier, ItemTemplate, InventoryTransaction

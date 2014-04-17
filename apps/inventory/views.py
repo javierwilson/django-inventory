@@ -4,7 +4,8 @@ from django.template import RequestContext
 from django.utils.translation import ugettext as _
 from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
-from django.views.generic.list_detail import object_detail, object_list
+from django.views.generic.list import ListView
+from django.views.generic.detail import DetailView
 from django.core.urlresolvers import reverse
 
 from generic_views.views import generic_assign_remove, generic_list
@@ -68,17 +69,10 @@ def template_assign_remove_suppliers(request, object_id):
         right_list_title=_(u'Assigned suppliers'),
         item_name=_(u"suppliers"))
             
-
-def template_items(request, object_id):
-    template = get_object_or_404(ItemTemplate, pk=object_id)
-    return object_list(
-        request,
-        queryset = template.item_set.all(),
-        template_name = "generic_list.html", 
-        extra_context=dict(
-            title = '%s: %s' % (_(u"assets that use the template"), template),
-        ),
-    )
+class TemplateItemsView(ListView):
+    template = get_object_or_404(ItemTemplate)
+    template_name = "generic_list.html"
+    queryset = template.item_set.all(),
 
 
 def inventory_view(request, object_id):

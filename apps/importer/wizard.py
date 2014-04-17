@@ -4,12 +4,13 @@ try:
 except ImportError:
     import pickle
 
+import hashlib
+
 from django import forms
 from django.conf import settings
-from django.contrib.formtools.wizard import FormWizard
+#from django.contrib.formtools.wizard import FormWizard
 from django.forms.forms import BoundField
 from django.forms.formsets import BaseFormSet
-from django.utils.hashcompat import md5_constructor
 
 __all__ = ('security_hash', 'BoundFormWizard')
 
@@ -46,9 +47,9 @@ def security_hash(request, form, exclude=None, *args):
     # Python 2.3, but Django requires 2.3 anyway, so that's OK.
     pickled = pickle.dumps(data, pickle.HIGHEST_PROTOCOL)
 
-    return md5_constructor(pickled).hexdigest()
+    return hashlib.md5(pickled).hexdigest()
 
-class BoundFormWizard(FormWizard):
+class BoundFormWizard(forms.Form):
     """Render prev_fields as a list of bound form fields in the template
     context rather than raw html."""
     def security_hash(self, request, form):

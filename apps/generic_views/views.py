@@ -8,8 +8,11 @@ from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.utils.translation import ugettext as _
-from django.views.generic.list_detail import object_detail, object_list
-from django.views.generic.create_update import create_object, update_object, delete_object
+#from django.views.generic.list_detail import object_detail, object_list
+#from django.views.generic.create_update import create_object, update_object, delete_object
+from django.views.generic.list import ListView
+from django.views.generic.detail import DetailView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 from forms import FilterForm, GenericConfirmForm, GenericAssignRemoveForm, \
                   DetailForm
